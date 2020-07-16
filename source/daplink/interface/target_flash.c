@@ -75,9 +75,15 @@ static error_t target_flash_init()
         return ERROR_ALGO_DL;
     }
 
+#ifdef TARGET_MCU_CORTEX_A
+    if (0 == swd_flash_syscall_exec_init(&flash->sys_call_s, flash->init, target_device.flash_start, 0, 0, 0)) {
+        return ERROR_INIT;
+    }
+#else
     if (0 == swd_flash_syscall_exec(&flash->sys_call_s, flash->init, target_device.flash_start, 0, 0, 0)) {
         return ERROR_INIT;
     }
+#endif
     state = STATE_OPEN;
     return ERROR_SUCCESS;
 }

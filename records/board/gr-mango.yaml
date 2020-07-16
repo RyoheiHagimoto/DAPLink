@@ -1,0 +1,10 @@
+common:
+    macros:
+        - TARGET_MCU_CORTEX_A
+    sources:
+        board:
+            - source/board/gr-mango.c
+        target:
+            - source/target/renesas/rza2m/gr-mango/target.c
+            - source/target/renesas/target_reset.c
+            - source/target/renesas/validation_rza.c

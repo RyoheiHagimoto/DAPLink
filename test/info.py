@@ -80,6 +80,7 @@ PROJECT_RELEASE_INFO = {
     ('lpc11u35_6lowpan_borderrouterethernet_if',    None,       0x0000,     "bin"       ),
     ('lpc11u35_gr_peach_if',                        None,       0x0000,     "bin"       ),
     ('lpc11u35_gr_lychee_if',                       None,       0x0000,     "bin"       ),
+    ('lpc11u35_gr_mango_if',                        None,       0x0000,     "bin"       ),
     ('lpc11u35_nz32_sc151_if',                      False,      0x0000,     "bin"       ),
     ('lpc11u35_wizwiki_w7500_if',                   False,      0x0000,     "bin"       ),
     ('lpc11u35_wizwiki_w7500_eco_if',               False,      0x0000,     "bin"       ),
@@ -205,6 +206,7 @@ SUPPORTED_CONFIGURATIONS = [
     (   0xC000,     'lpc11u35_cocorico_if',                     None,               'CoCo-ri-Co'                            ),
     (   0x5500,     'lpc11u35_gr_peach_if',                     None,               None                                    ), # TODO - Set to 'Renesas-GR-PEACH' once this target builds
     (   0x5501,     'lpc11u35_gr_lychee_if',                    None,               None                                    ), # TODO - Set to 'Renesas-GR-LYCHEE' once this target builds
+    (   0x5502,     'lpc11u35_gr_mango_if',                     None,               None                                    ), # TODO - Set to 'Renesas-GR-MANGO' once this target builds
     (   0x6660,     'lpc11u35_nz32_sc151_if',                   None,               None                                    ), # TODO - set target to 'NZ32-SC151' when mbed-os supports this
     (   0x2201,     'lpc11u35_wizwiki_w7500_if',                None,               'WIZwiki-W7500'                         ),
     (   0x2202,     'lpc11u35_wizwiki_w7500_eco_if',            None,               'WIZwiki-W7500ECO'                      ),
@@ -271,6 +273,7 @@ BOARD_ID_SUPPORTING_PAGE_ERASE = set([
     0x3300,  # dipdap_cc3220sf
     0x5500,  # GR-PEACH
     0x5501,  # GR-LYCHEE
+    0x5502,  # GR-MANGO
 ])
 
 #Hack until these targets have an image with a valid vector table
