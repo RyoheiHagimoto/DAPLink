@@ -654,69 +654,6 @@ uint8_t swd_flash_syscall_exec(const program_syscall_t *sysCallParam, uint32_t e
     return 1;
 }
 
-uint8_t swd_flash_syscall_exec_init(const program_syscall_t *sysCallParam, uint32_t entry, uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4)
-{
-    uint32_t val;
-    DEBUG_STATE state = {{0}, 0};
-    do {
-        // Call flash algorithm function on target and wait for result.
-        state.r[0]     = arg1;                   // R0: Argument 1
-        state.r[1]     = arg2;                   // R1: Argument 2
-        state.r[2]     = arg3;                   // R2: Argument 3
-        state.r[3]     = arg4;                   // R3: Argument 4
-        state.r[9]     = sysCallParam->static_base;    // SB: Static Base
-        state.r[13]    = sysCallParam->stack_pointer;  // SP: Stack Pointer
-        state.r[14]    = sysCallParam->breakpoint;     // LR: Exit Point
-        state.r[15]    = entry;                        // PC: Entry Point
-        state.xpsr     = 0x00000000;          // xPSR: T = 1, ISR = 0
-
-        if (!swd_enable_debug()) {
-            return 0;
-        }
-        if (!swd_write_debug_state(&state)) {
-            return 0;
-        }
-
-        os_dly_wait(10);
-        /* DBGDRCR halt req*/
-        val = 0x00000001;
-        if (!swd_write_word(DBGDRCR, val )) {
-            return 0;
-        }
-        os_dly_wait(2);
-        if (!swd_wait_until_halted()) {
-            return 0;
-        }
-        if (!swd_enable_debug()) {
-            return 0;
-        }
-        if (!swd_read_core_register(15, &val)) {
-            return 0;
-        }
-
-        /* DBGDRCR halt req*/
-    }while(val != state.r[14]);
-    
-    if (!swd_wait_until_halted()) {
-        return 0;
-    }
-
-    if (!swd_enable_debug()) {
-        return 0;
-    }
-
-    if (!swd_read_core_register(0, &state.r[0])) {
-        return 0;
-    }
-
-    // Flash functions return 0 if successful.
-    if (state.r[0] != 0) {
-        return 0;
-    }
-    
-    return 1;
-}
-
 // SWD Reset
 static uint8_t swd_reset(void)
 {
@@ -868,18 +805,39 @@ uint8_t swd_set_target_state_hw(TARGET_RESET_STATE state)
             break;
 
         case RESET_PROGRAM:
+            /* hardware reset */
             swd_set_target_reset(1);
             os_dly_wait(2);
             swd_set_target_reset(0);
-            os_dly_wait(2);
-
+            
+            /* initialize debug */
             if (!swd_init_debug()) {
                 return 0;
             }
-
             if (!swd_enable_debug()) {
                 return 0;
             }
+            /* Enable debug and halt the core (DHCSR <- 0xA05F0003) */
+            if (!swd_write_word(DBG_HCSR, DBGKEY | C_DEBUGEN | C_HALT)) {
+                return 0;
+            }
+
+            /* DBGDRCR halt req*/
+            val = 0x00000001;
+            if (!swd_write_word(DBGDRCR, val )) {
+                return 0;
+            }
+            // Enable halt on reset
+            if (!swd_write_word(DBG_EMCR, VC_CORERESET)) {
+                return 0;
+            }
+
+            // Perform a soft reset
+            if (!swd_write_word(NVIC_AIRCR, VECTKEY | SOFT_RESET)) {
+                return 0;
+            }
+
+            // halt as soon as posible
             /* DBGDRCR halt req*/
             val = 0x00000001;
             if (!swd_write_word(DBGDRCR, val )) {
@@ -889,7 +847,6 @@ uint8_t swd_set_target_state_hw(TARGET_RESET_STATE state)
             if (!swd_wait_until_halted()) {
                 return 0;
             }
-
             break;
 
         case NO_DEBUG:

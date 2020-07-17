@@ -402,6 +402,10 @@ projects:
         - *module_if
         - *module_hic_lpc11u35
         - records/board/gr-lychee.yaml
+    lpc11u35_gr_mango_if:
+        - *module_if
+        - *module_hic_lpc11u35
+        - records/board/gr-mango.yaml
     lpc11u35_dipdap_sdt32429b_if:
         - *module_if
         - *module_hic_lpc11u35
